@@ -1,15 +1,14 @@
 package model;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface Cart {
-    List<Food> viewCart() throws SQLException;
+    List<Food> view();
 
-    boolean modifyCart(int foodId, int quantity);
+    boolean modifyFoodQuantity(int foodId, int quantity);
 
-    boolean removeCartItem(int foodId);
+    boolean removeItem(int foodId);
 
-    List<Food> checkout() throws SQLException;
+    List<Food> checkout();
 
 }

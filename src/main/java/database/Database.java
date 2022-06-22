@@ -15,7 +15,7 @@ public class Database {
         Class.forName(mySqlDriver);
         if (connection == null) {
             connection = DriverManager.getConnection(
-                    JDBC_MYSQL_LOCALHOST, "root", "Sruthiar");
+                    "jdbc:mysql://localhost:3306/sample", "root", "951753258SSR");
 
         }
         return connection;

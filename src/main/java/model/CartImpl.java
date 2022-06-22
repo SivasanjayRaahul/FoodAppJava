@@ -2,9 +2,6 @@ package model;
 
 import repository.FoodAppRepo;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CartImpl implements Cart {
@@ -17,30 +14,22 @@ public class CartImpl implements Cart {
     }
 
     @Override
-    public List<Food> viewCart()  {
-        return foodAppRepo.viewCart(mailId);
+    public List<Food> view()  {
+        return foodAppRepo.viewCartItems(mailId);
     }
 
     @Override
-    public boolean modifyCart(int foodId, int quantity) {
+    public boolean modifyFoodQuantity(int foodId, int quantity) {
         return foodAppRepo.modifyCart(foodId, quantity, mailId);
     }
 
     @Override
-    public boolean removeCartItem(int foodId) {
+    public boolean removeItem(int foodId) {
         return foodAppRepo.removeCartItem(foodId, mailId);
     }
 
     @Override
-    public List<Food> checkout() throws SQLException {
-        ResultSet result = foodAppRepo.checkout(mailId);
-        List<Food> items = new ArrayList<>();
-        if (result.next()) {
-            while (result.next()) {
-                items.add(new Food(result.getInt(1), result.getString(2), result.getInt(4), result.getInt(5)));
-            }
-            return items;
-        }
-        return new ArrayList<>();
+    public List<Food> checkout() {
+        return foodAppRepo.checkoutCart(mailId);
     }
 }

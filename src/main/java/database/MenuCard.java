@@ -5,11 +5,11 @@ import model.Food;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Menu {
-    private static Menu menu;
+public class MenuCard {
+    private static MenuCard menuCard;
     private final List<Food> items = new ArrayList<>();
 
-    private Menu() {
+    private MenuCard() {
         items.add(new Food(1, "Plain Dosa", 1, 10));
         items.add(new Food(2, "Onion Roast", 1, 70));
         items.add(new Food(3, "Ghee Roast", 1, 60));
@@ -23,17 +23,15 @@ public class Menu {
 
     }
 
-    public static Menu getInstance() {
-        if (menu == null) {
-            menu = new Menu();
+    public static MenuCard getInstance() {
+        if (menuCard == null) {
+            menuCard = new MenuCard();
         }
-        return menu;
+        return menuCard;
     }
 
-    public void viewItems() {
-        for (Food food : items) {
-            System.out.println(food.foodId + " " + food.name + " " + food.cost);
-        }
+    public List<Food> viewItems() {
+        return items;
     }
 
     public Food getItem(int foodId) {

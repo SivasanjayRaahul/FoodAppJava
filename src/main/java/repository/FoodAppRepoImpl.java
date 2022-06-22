@@ -1,7 +1,8 @@
 package repository;
 
 import database.Database;
-import database.Menu;
+import database.MenuCard;
+import exceptions.CartItemsException;
 import model.Food;
 
 import java.sql.PreparedStatement;
@@ -14,18 +15,21 @@ import java.util.logging.Logger;
 
 public class FoodAppRepoImpl implements FoodAppRepo {
     Logger logger = Logger.getLogger("FoodAppRepoImpl");
+
     @Override
-    public ResultSet isLoginSuccessful(String mail_Id, String password) {
+    public boolean isLoginSuccessful(String mail_Id, String password) {
         ResultSet result = null;
+        boolean isLoginSuccessful = false;
         try {
             PreparedStatement selectCredentials = Database.getConnection().prepareStatement("select * from register where mail_id=? and password=?");
             selectCredentials.setString(1, mail_Id);
             selectCredentials.setString(2, password);
             result = selectCredentials.executeQuery();
+            isLoginSuccessful = result.next();
         } catch (SQLException | ClassNotFoundException e) {
             logger.log(Level.SEVERE, e.getMessage());
         }
-        return result;
+        return isLoginSuccessful;
     }
 
     @Override
@@ -39,12 +43,12 @@ public class FoodAppRepoImpl implements FoodAppRepo {
             createUser.executeUpdate();
 
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage());
         }
     }
 
     @Override
-    public List<Food> viewCart(String mailId) {
+    public List<Food> viewCartItems(String mailId) {
 
         ResultSet result;
         List<Food> items = new ArrayList<>();
@@ -56,7 +60,7 @@ public class FoodAppRepoImpl implements FoodAppRepo {
                 items.add(new Food(result.getInt(1), result.getString(2), result.getInt(4), result.getInt(5)));
             }
         } catch (SQLException | ClassNotFoundException e) {
-            System.out.println("No food available! ");
+            logger.log(Level.SEVERE, e.getMessage());
         }
 
         return items;
@@ -72,14 +76,14 @@ public class FoodAppRepoImpl implements FoodAppRepo {
             if (rs.next()) {
                 PreparedStatement updateFood = Database.getConnection().prepareStatement("update cart set quantity =?, cost=?  where foodId= ? and mail_id=?");
                 updateFood.setInt(1, quantity);
-                updateFood.setInt(2, Menu.getInstance().getItem(foodId).cost * quantity);
+                updateFood.setInt(2, MenuCard.getInstance().getItem(foodId).cost * quantity);
                 updateFood.setInt(3, foodId);
                 updateFood.setString(4, mailId);
                 updateFood.executeUpdate();
                 return true;
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException | SQLException e) {
+            logger.log(Level.SEVERE, e.getMessage());
         }
         return false;
     }
@@ -99,14 +103,15 @@ public class FoodAppRepoImpl implements FoodAppRepo {
                 return true;
             }
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage());
         }
         return false;
     }
 
     @Override
-    public ResultSet checkout(String mailId) {
-        ResultSet result = null;
+    public List<Food> checkoutCart(String mailId) {
+        List<Food> items = new ArrayList<>();
+        ResultSet result;
         try {
             PreparedStatement selectFoodItems = Database.getConnection().prepareStatement("select * from cart where mail_id=?");
             selectFoodItems.setString(1, mailId);
@@ -120,14 +125,61 @@ public class FoodAppRepoImpl implements FoodAppRepo {
                     buyFoods.setInt(4, result.getInt(4));
                     buyFoods.setInt(5, result.getInt(5));
                     buyFoods.executeUpdate();
+                    items.add(new Food(result.getInt(1), result.getString(2), result.getInt(4), result.getInt(5)));
                 }
                 PreparedStatement deleteCart = Database.getConnection().prepareStatement("delete from cart where mail_id=?");
                 deleteCart.setString(1, mailId);
                 deleteCart.executeUpdate();
             }
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage());
         }
-        return result;
+        return items;
+    }
+
+    @Override
+    public void addFoodItemToCart(String mailId, int foodId, int quantity) {
+        MenuCard menuCard = MenuCard.getInstance();
+        Food food = menuCard.getItem(foodId);
+        try {
+            PreparedStatement selectFood = Database.getConnection().prepareStatement("select * from cart where mail_id =? and foodId= ?");
+            selectFood.setString(1, mailId);
+            selectFood.setInt(2, foodId);
+            ResultSet result = selectFood.executeQuery();
+            if (result.next()) {
+                PreparedStatement updateFood = Database.getConnection().prepareStatement("update cart set quantity =?, cost=?  where foodId= ? and mail_id=?");
+                updateFood.setInt(1, result.getInt(4) + quantity);
+                updateFood.setInt(2, menuCard.getItem(foodId).cost * (result.getInt(4) + quantity));
+                updateFood.setInt(3, foodId);
+                updateFood.setString(4, mailId);
+                updateFood.executeUpdate();
+            } else {
+                PreparedStatement addFood = Database.getConnection().prepareStatement("Insert into cart values(?,?,?,?,?)");
+                addFood.setInt(1, foodId);
+                addFood.setString(2, food.name);
+                addFood.setString(3, mailId);
+                addFood.setInt(4, quantity);
+                addFood.setInt(5, food.cost * quantity);
+                addFood.executeUpdate();
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Food> purchaseHistory(String mailId) {
+        List<Food> items = new ArrayList<>();
+        try {
+            PreparedStatement viewHistory = Database.getConnection().prepareStatement("Select * from PurchasedHistory where mail_id=?");
+            viewHistory.setString(1, mailId);
+            ResultSet result = viewHistory.executeQuery();
+            while (result.next()) {
+                items.add(new Food(result.getInt(1), result.getString(2), result.getInt(4), result.getInt(5)));
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        }
+        return items;
     }
 }
