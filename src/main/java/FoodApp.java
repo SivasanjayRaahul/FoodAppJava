@@ -3,6 +3,7 @@ import model.MenuImpl;
 import model.UserImpl;
 import repository.FoodAppRepo;
 import repository.FoodAppRepoImpl;
+
 import static constants.Constants.scanner;
 
 public class FoodApp {
@@ -28,7 +29,7 @@ public class FoodApp {
 
             if (userImpl.isLoginSuccessful(mailId, password)) {
                 System.out.println("*Login Successful*");
-                menu(mailId);
+                menuNavigation(mailId);
             } else {
                 System.out.println("Login Failed!!");
                 main(args);
@@ -55,7 +56,7 @@ public class FoodApp {
         }
     }
 
-    public static void menu(String mailId) {
+    public static void menuNavigation(String mailId) {
         MenuImpl menuImpl = new MenuImpl(mailId, foodAppRepo);
 
         int option;
@@ -66,8 +67,8 @@ public class FoodApp {
         option = scanner.nextInt();
         switch (option) {
             case 1:
-                System.out.println(menuImpl.viewItems());
-                menu(mailId);
+                menuImpl.viewItems().forEach(item-> System.out.println(item.toString()));
+                menuNavigation(mailId);
                 break;
             case 2:
                 System.out.println("Enter FoodID");
@@ -78,19 +79,19 @@ public class FoodApp {
                     System.out.println("*Added To Cart*");
                 else
                     System.out.println("Failed To Add To Cart!!");
-                menu(mailId);
+                menuNavigation(mailId);
                 break;
             case 3:
-                cart(mailId);
+                cartNavigation(mailId);
                 break;
             case 4:
                 System.out.println(menuImpl.purchaseHistory());
-                menu(mailId);
+                menuNavigation(mailId);
                 break;
         }
     }
 
-    public static void cart(String mailId) {
+    public static void cartNavigation(String mailId) {
 
         CartImpl cartImpl = new CartImpl(mailId, foodAppRepo);
 
@@ -104,13 +105,13 @@ public class FoodApp {
         switch (cartOption) {
             case 1:
                 System.out.println(cartImpl.view());
-                cart(mailId);
+                cartNavigation(mailId);
                 break;
             case 2:
                 System.out.println("Enter the FoodID to be removed from Cart");
                 foodId = scanner.nextInt();
                 cartImpl.removeItem(foodId);
-                cart(mailId);
+                cartNavigation(mailId);
                 break;
             case 3:
                 System.out.println("Enter FoodID to be modified in Cart");
@@ -118,14 +119,14 @@ public class FoodApp {
                 System.out.println("Enter Quantity");
                 int quantity = scanner.nextInt();
                 cartImpl.modifyFoodQuantity(foodId, quantity);
-                cart(mailId);
+                cartNavigation(mailId);
                 break;
             case 4:
                 cartImpl.checkout();
-                cart(mailId);
+                cartNavigation(mailId);
                 break;
             case 5:
-                menu(mailId);
+                menuNavigation(mailId);
                 break;
         }
     }

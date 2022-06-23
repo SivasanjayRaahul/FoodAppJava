@@ -14,4 +14,13 @@ public class Food {
         this.quantity = quantity;
     }
 
+    @Override
+    public String toString() {
+        return "Food{" +
+                "name='" + name + '\'' +
+                ", cost=" + cost +
+                ", foodId=" + foodId +
+                ", quantity=" + quantity +
+                '}';
+    }
 }

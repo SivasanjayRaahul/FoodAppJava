@@ -1,10 +1,6 @@
 package model;
 
 import repository.FoodAppRepo;
-import repository.FoodAppRepoImpl;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class UserImpl implements User {
 

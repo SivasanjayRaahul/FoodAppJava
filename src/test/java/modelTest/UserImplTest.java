@@ -1,6 +1,5 @@
 package modelTest;
 
-import model.CartImpl;
 import model.UserImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,8 @@ import repository.FoodAppRepoImpl;
 
 import java.sql.SQLException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,9 +37,9 @@ public class UserImplTest {
     @Test
     void shouldReturnFalseWhenNewUserLogIn() throws SQLException {
 
-        when(foodAppRepo.isLoginSuccessful(any(), any())).thenReturn(false);
+        when(foodAppRepo.isLoginSuccessful("abc@abc.com","ssrraja123")).thenReturn(false);
 
-        assertFalse(userImpl.isLoginSuccessful(any(), any()));
+        assertFalse(userImpl.isLoginSuccessful("abc@abc.com","ssrraja123"));
 
     }
 
@@ -50,7 +50,7 @@ public class UserImplTest {
 
     @Test
     void shouldReturnFalseWhenNewUserRegisterWithEmptyName() {
-        assertFalse(userImpl.isRegistrationSuccessful("", any(), any(), any()));
+        assertFalse(userImpl.isRegistrationSuccessful("", "1234567890","abc@abc.com","ssrja"));
     }
 
 

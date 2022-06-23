@@ -2,7 +2,6 @@ package repository;
 
 import database.Database;
 import database.MenuCard;
-import exceptions.CartItemsException;
 import model.Food;
 
 import java.sql.PreparedStatement;
