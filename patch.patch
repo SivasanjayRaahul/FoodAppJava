@@ -1,0 +1,198 @@
+diff --git a/src/main/java/FoodApp.java b/src/main/java/FoodApp.java
+index f14f69d..ea189e2 100644
+--- a/src/main/java/FoodApp.java
++++ b/src/main/java/FoodApp.java
+@@ -3,6 +3,7 @@ import model.MenuImpl;
+ import model.UserImpl;
+ import repository.FoodAppRepo;
+ import repository.FoodAppRepoImpl;
++
+ import static constants.Constants.scanner;
+ 
+ public class FoodApp {
+@@ -28,7 +29,7 @@ public class FoodApp {
+ 
+             if (userImpl.isLoginSuccessful(mailId, password)) {
+                 System.out.println("*Login Successful*");
+-                menu(mailId);
++                menuNavigation(mailId);
+             } else {
+                 System.out.println("Login Failed!!");
+                 main(args);
+@@ -55,7 +56,7 @@ public class FoodApp {
+         }
+     }
+ 
+-    public static void menu(String mailId) {
++    public static void menuNavigation(String mailId) {
+         MenuImpl menuImpl = new MenuImpl(mailId, foodAppRepo);
+ 
+         int option;
+@@ -66,8 +67,8 @@ public class FoodApp {
+         option = scanner.nextInt();
+         switch (option) {
+             case 1:
+-                System.out.println(menuImpl.viewItems());
+-                menu(mailId);
++                menuImpl.viewItems().forEach(item-> System.out.println(item.toString()));
++                menuNavigation(mailId);
+                 break;
+             case 2:
+                 System.out.println("Enter FoodID");
+@@ -78,19 +79,19 @@ public class FoodApp {
+                     System.out.println("*Added To Cart*");
+                 else
+                     System.out.println("Failed To Add To Cart!!");
+-                menu(mailId);
++                menuNavigation(mailId);
+                 break;
+             case 3:
+-                cart(mailId);
++                cartNavigation(mailId);
+                 break;
+             case 4:
+                 System.out.println(menuImpl.purchaseHistory());
+-                menu(mailId);
++                menuNavigation(mailId);
+                 break;
+         }
+     }
+ 
+-    public static void cart(String mailId) {
++    public static void cartNavigation(String mailId) {
+ 
+         CartImpl cartImpl = new CartImpl(mailId, foodAppRepo);
+ 
+@@ -104,13 +105,13 @@ public class FoodApp {
+         switch (cartOption) {
+             case 1:
+                 System.out.println(cartImpl.view());
+-                cart(mailId);
++                cartNavigation(mailId);
+                 break;
+             case 2:
+                 System.out.println("Enter the FoodID to be removed from Cart");
+                 foodId = scanner.nextInt();
+                 cartImpl.removeItem(foodId);
+-                cart(mailId);
++                cartNavigation(mailId);
+                 break;
+             case 3:
+                 System.out.println("Enter FoodID to be modified in Cart");
+@@ -118,14 +119,14 @@ public class FoodApp {
+                 System.out.println("Enter Quantity");
+                 int quantity = scanner.nextInt();
+                 cartImpl.modifyFoodQuantity(foodId, quantity);
+-                cart(mailId);
++                cartNavigation(mailId);
+                 break;
+             case 4:
+                 cartImpl.checkout();
+-                cart(mailId);
++                cartNavigation(mailId);
+                 break;
+             case 5:
+-                menu(mailId);
++                menuNavigation(mailId);
+                 break;
+         }
+     }
+diff --git a/src/main/java/model/Food.java b/src/main/java/model/Food.java
+index 744b577..c7f80e6 100644
+--- a/src/main/java/model/Food.java
++++ b/src/main/java/model/Food.java
+@@ -14,4 +14,13 @@ public class Food {
+         this.quantity = quantity;
+     }
+ 
++    @Override
++    public String toString() {
++        return "Food{" +
++                "name='" + name + '\'' +
++                ", cost=" + cost +
++                ", foodId=" + foodId +
++                ", quantity=" + quantity +
++                '}';
++    }
+ }
+diff --git a/src/main/java/model/User.java b/src/main/java/model/User.java
+index 1ca688b..982ba90 100644
+--- a/src/main/java/model/User.java
++++ b/src/main/java/model/User.java
+@@ -1,7 +1,5 @@
+ package model;
+ 
+-import java.sql.SQLException;
+-
+ public interface User {
+     boolean isLoginSuccessful(String mailId, String password);
+ 
+diff --git a/src/main/java/model/UserImpl.java b/src/main/java/model/UserImpl.java
+index bc5c621..50765ce 100644
+--- a/src/main/java/model/UserImpl.java
++++ b/src/main/java/model/UserImpl.java
+@@ -1,10 +1,6 @@
+ package model;
+ 
+ import repository.FoodAppRepo;
+-import repository.FoodAppRepoImpl;
+-
+-import java.sql.ResultSet;
+-import java.sql.SQLException;
+ 
+ public class UserImpl implements User {
+ 
+diff --git a/src/main/java/repository/FoodAppRepoImpl.java b/src/main/java/repository/FoodAppRepoImpl.java
+index 9e1ca19..66f5ba1 100644
+--- a/src/main/java/repository/FoodAppRepoImpl.java
++++ b/src/main/java/repository/FoodAppRepoImpl.java
+@@ -2,7 +2,6 @@ package repository;
+ 
+ import database.Database;
+ import database.MenuCard;
+-import exceptions.CartItemsException;
+ import model.Food;
+ 
+ import java.sql.PreparedStatement;
+diff --git a/src/test/java/modelTest/UserImplTest.java b/src/test/java/modelTest/UserImplTest.java
+index f61349a..e5a28ab 100644
+--- a/src/test/java/modelTest/UserImplTest.java
++++ b/src/test/java/modelTest/UserImplTest.java
+@@ -1,6 +1,5 @@
+ package modelTest;
+ 
+-import model.CartImpl;
+ import model.UserImpl;
+ import org.junit.jupiter.api.BeforeAll;
+ import org.junit.jupiter.api.Test;
+@@ -9,7 +8,8 @@ import repository.FoodAppRepoImpl;
+ 
+ import java.sql.SQLException;
+ 
+-import static org.junit.jupiter.api.Assertions.*;
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertTrue;
+ import static org.mockito.Matchers.any;
+ import static org.mockito.Mockito.mock;
+ import static org.mockito.Mockito.when;
+@@ -37,9 +37,9 @@ public class UserImplTest {
+     @Test
+     void shouldReturnFalseWhenNewUserLogIn() throws SQLException {
+ 
+-        when(foodAppRepo.isLoginSuccessful(any(), any())).thenReturn(false);
++        when(foodAppRepo.isLoginSuccessful("abc@abc.com","ssrraja123")).thenReturn(false);
+ 
+-        assertFalse(userImpl.isLoginSuccessful(any(), any()));
++        assertFalse(userImpl.isLoginSuccessful("abc@abc.com","ssrraja123"));
+ 
+     }
+ 
+@@ -50,7 +50,7 @@ public class UserImplTest {
+ 
+     @Test
+     void shouldReturnFalseWhenNewUserRegisterWithEmptyName() {
+-        assertFalse(userImpl.isRegistrationSuccessful("", any(), any(), any()));
++        assertFalse(userImpl.isRegistrationSuccessful("", "1234567890","abc@abc.com","ssrja"));
+     }
+ 
+ 
